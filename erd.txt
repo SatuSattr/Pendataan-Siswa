@@ -1,0 +1,87 @@
+dbml
+
+Table users {
+  id bigint [pk, increment]
+  name string
+  email string [unique]
+  email_verified_at timestamp
+  password string
+  role string [default: 'admin']
+  remember_token string
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table password_reset_tokens {
+  email string [pk]
+  token string
+  created_at timestamp
+}
+
+Table sessions {
+  id string [pk]
+  user_id bigint
+  ip_address string
+  user_agent text
+  payload longtext
+  last_activity int
+}
+
+Table tahun_ajars {
+  id bigint [pk, increment]
+  kode_tahun_ajar string [unique]
+  nama_tahun_ajar string
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table jurusans {
+  id bigint [pk, increment]
+  kode_jurusan string [unique]
+  nama_jurusan string
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table kelas {
+  id bigint [pk, increment]
+  nama_kelas string
+  level_kelas string
+  tahun_ajar_id bigint
+  jurusan_id bigint
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table siswas {
+  id bigint [pk, increment]
+  nisn string [unique]
+  nama string
+  alamat text
+  tanggal_lahir date
+  jenis_kelamin string
+  jurusan_id bigint
+  tahun_ajar_id bigint
+  foto_path string
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table kelas_details {
+  id bigint [pk, increment]
+  siswa_id bigint
+  kelas_id bigint
+  tahun_ajar_id bigint
+  status string [default: 'aktif']
+  created_at timestamp
+  updated_at timestamp
+}
+
+Ref: sessions.user_id > users.id
+Ref: kelas.tahun_ajar_id > tahun_ajars.id [delete: cascade]
+Ref: kelas.jurusan_id > jurusans.id [delete: cascade]
+Ref: siswas.jurusan_id > jurusans.id [delete: cascade]
+Ref: siswas.tahun_ajar_id > tahun_ajars.id [delete: cascade]
+Ref: kelas_details.siswa_id > siswas.id [delete: cascade]
+Ref: kelas_details.kelas_id > kelas.id [delete: cascade]
+Ref: kelas_details.tahun_ajar_id > tahun_ajars.id [delete: cascade]

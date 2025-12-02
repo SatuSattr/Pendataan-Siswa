@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --bg-grid: radial-gradient(circle at 1px 1px, rgb(15 118 178 / 0.12) 1.5px, transparent 0);
+    }
+
+    body {
+        @apply bg-slate-50 text-slate-900 antialiased;
+        background-image:
+            linear-gradient(135deg, rgb(15 23 42 / 0.03) 0%, rgb(14 154 230 / 0.08) 50%, rgb(14 154 230 / 0.03) 100%),
+            var(--bg-grid);
+        background-size: 100% 100%, 48px 48px;
+    }
+
+    [x-cloak] {
+        display: none !important;
+    }
+
+    ::selection {
+        @apply bg-brand-100 text-brand-900;
+    }
+}
+
+@layer components {
+    .glass-panel {
+        @apply bg-white/80 backdrop-blur-xl border border-white/60 shadow-lg shadow-brand-100/60;
+    }
+
+    .card-surface {
+        @apply bg-white/90 border border-slate-200;
+    }
+
+    .badge-soft {
+        @apply inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold bg-brand-50 text-brand-700 ring-1 ring-brand-100;
+    }
+
+    .btn-brand {
+        @apply inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-brand-500 to-cyan-500 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-brand-200 transition hover:from-brand-600 hover:to-cyan-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400;
+    }
+
+    .btn-ghost {
+        @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-slate-700 ring-1 ring-slate-200 transition hover:bg-slate-100 hover:text-slate-900;
+    }
+
+    .table-soft thead {
+        @apply bg-slate-50;
+    }
+
+    .table-soft th {
+        @apply text-xs font-semibold uppercase tracking-wide text-slate-500;
+    }
+
+    .table-soft td {
+        @apply text-sm text-slate-800;
+    }
+}
