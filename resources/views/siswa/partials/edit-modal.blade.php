@@ -7,6 +7,7 @@
         class="relative w-full max-w-4xl rounded-2xl bg-white max-h-[95vh] overflow-y-auto p-6 shadow-2xl ring-1 ring-slate-200">
         @csrf
         @method('PUT')
+        <input type="hidden" name="redirect_to" x-bind:value="redirectTo || ''">
 
         <button type="button"
             class="absolute right-6 top-6 z-20 flex items-center rounded-xl border p-3 border-slate-200 text-slate-700 hover:border-brand-300 hover:text-brand-700"

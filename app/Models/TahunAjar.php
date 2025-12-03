@@ -12,6 +12,11 @@ class TahunAjar extends Model
     protected $fillable = [
         'kode_tahun_ajar',
         'nama_tahun_ajar',
+        'is_active',
+    ];
+
+    protected $casts = [
+        'is_active' => 'boolean',
     ];
 
     public function kelas()

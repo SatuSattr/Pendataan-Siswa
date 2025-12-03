@@ -15,9 +15,8 @@ class JurusanSeeder extends Seeder
     {
         $data = [
             ['kode_jurusan' => 'RPL', 'nama_jurusan' => 'Rekayasa Perangkat Lunak'],
+            ['kode_jurusan' => 'DKV', 'nama_jurusan' => 'Desain Komunikasi Visual'],
             ['kode_jurusan' => 'TKJ', 'nama_jurusan' => 'Teknik Komputer dan Jaringan'],
-            ['kode_jurusan' => 'AKL', 'nama_jurusan' => 'Akuntansi dan Keuangan Lembaga'],
-            ['kode_jurusan' => 'OTKP', 'nama_jurusan' => 'Otomatisasi dan Tata Kelola Perkantoran'],
         ];
 
         foreach ($data as $jurusan) {

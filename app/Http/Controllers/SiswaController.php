@@ -126,7 +126,44 @@ class SiswaController extends Controller
     {
         $siswa->load(['jurusan', 'tahunAjar', 'kelasDetails' => fn ($q) => $q->with(['kelas', 'tahunAjar'])->orderByDesc('created_at')]);
 
-        return view('siswa.show', compact('siswa'));
+        $activeDetail = $siswa->kelasDetails->firstWhere('status', 'aktif') ?? $siswa->kelasDetails->first();
+        $history = $siswa->kelasDetails
+            ->map(function ($detail) {
+                return [
+                    'kelas' => $detail->kelas->nama_kelas ?? '-',
+                    'tahun' => $detail->tahunAjar->kode_tahun_ajar ?? '-',
+                    'status' => $detail->status,
+                    'tanggal' => optional($detail->created_at)->format('d M Y'),
+                ];
+            })
+            ->values();
+        $fotoUrl = $siswa->foto_path ? Storage::url($siswa->foto_path) : null;
+        $kelasList = Kelas::with('jurusan')->orderBy('nama_kelas')->get();
+        $tahunAjars = TahunAjar::orderByDesc('kode_tahun_ajar')->get();
+        $kelasJurusanMap = $kelasList->mapWithKeys(function ($k) {
+            return [
+                $k->id => [
+                    'jurusan_id' => $k->jurusan_id,
+                    'jurusan' => optional($k->jurusan)->nama_jurusan,
+                ],
+            ];
+        });
+
+        $initialEdit = [
+            'id' => $siswa->id,
+            'nama' => $siswa->nama,
+            'nisn' => $siswa->nisn,
+            'alamat' => $siswa->alamat,
+            'tanggal_lahir' => optional($siswa->tanggal_lahir)->toDateString(),
+            'jenis_kelamin' => $siswa->jenis_kelamin,
+            'jurusan_id' => $siswa->jurusan_id,
+            'jurusan_name' => $siswa->jurusan->nama_jurusan ?? null,
+            'tahun_ajar_id' => $activeDetail?->tahunAjar?->id ?? $siswa->tahun_ajar_id,
+            'kelas_id' => $activeDetail?->kelas?->id,
+            'foto_url' => $fotoUrl,
+        ];
+
+        return view('siswa.show', compact('siswa', 'activeDetail', 'history', 'fotoUrl', 'kelasList', 'tahunAjars', 'kelasJurusanMap', 'initialEdit'));
     }
 
     /**
@@ -200,6 +237,11 @@ class SiswaController extends Controller
                 ]);
             }
         });
+
+        $redirectTo = $request->input('redirect_to');
+        if ($redirectTo) {
+            return redirect($redirectTo)->with('success', 'Data siswa berhasil diperbarui.');
+        }
 
         return redirect()->route('siswa.index')->with('success', 'Data siswa berhasil diperbarui.');
     }

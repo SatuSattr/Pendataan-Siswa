@@ -52,11 +52,11 @@
             <div class="card-surface rounded-2xl p-5">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Total Pengguna</p>
-                        <p class="mt-2 text-3xl font-bold text-slate-900">{{ $totalUsers }}</p>
+                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Tahun Ajar Aktif</p>
+                        <p class="mt-2 text-3xl font-bold text-slate-900">{{ optional($activeTahunAjar)->kode_tahun_ajar ?? 'Belum ditetapkan' }}</p>
                     </div>
                     <span class="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-50 text-brand-600 ring-1 ring-brand-100">
-                        <i class="fa-solid fa-user-shield"></i>
+                        <i class="fa-solid fa-calendar-days"></i>
                     </span>
                 </div>
             </div>

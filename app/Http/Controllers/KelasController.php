@@ -16,6 +16,9 @@ class KelasController extends Controller
     public function index()
     {
         $kelas = Kelas::with(['jurusan', 'tahunAjar'])
+            ->withCount(['kelasDetails as siswa_count' => function ($q) {
+                $q->where('status', 'aktif');
+            }])
             ->orderByDesc('created_at')
             ->paginate(10);
 
@@ -59,11 +62,22 @@ class KelasController extends Controller
             'jurusan',
             'tahunAjar',
             'kelasDetails' => function ($query) {
-                $query->where('status', 'aktif')->with('siswa');
+                $query->where('status', 'aktif')->with(['siswa.jurusan', 'kelas', 'tahunAjar']);
             },
         ]);
 
-        return view('kelas.show', compact('kelas'));
+        $kelasList = Kelas::with('jurusan')->orderBy('nama_kelas')->get();
+        $tahunAjars = TahunAjar::orderByDesc('kode_tahun_ajar')->get();
+        $kelasJurusanMap = $kelasList->mapWithKeys(function ($k) {
+            return [
+                $k->id => [
+                    'jurusan_id' => $k->jurusan_id,
+                    'jurusan' => optional($k->jurusan)->nama_jurusan,
+                ],
+            ];
+        });
+
+        return view('kelas.show', compact('kelas', 'kelasList', 'tahunAjars', 'kelasJurusanMap'));
     }
 
     /**

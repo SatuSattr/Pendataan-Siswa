@@ -18,6 +18,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::middleware('admin')->group(function () {
         Route::resource('tahun-ajar', TahunAjarController::class)->parameters(['tahun-ajar' => 'tahunAjar']);
+        Route::patch('tahun-ajar/{tahunAjar}/toggle', [TahunAjarController::class, 'toggle'])->name('tahun-ajar.toggle');
         Route::resource('jurusan', JurusanController::class);
         Route::resource('kelas', KelasController::class)->parameters(['kelas' => 'kelas']);
         Route::resource('siswa', SiswaController::class);

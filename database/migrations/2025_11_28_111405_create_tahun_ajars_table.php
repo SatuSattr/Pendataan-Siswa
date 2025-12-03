@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('kode_tahun_ajar')->unique();
             $table->string('nama_tahun_ajar');
+            $table->boolean('is_active')->default(false);
             $table->timestamps();
         });
     }

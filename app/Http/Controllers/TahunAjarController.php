@@ -76,6 +76,30 @@ class TahunAjarController extends Controller
         return redirect()->route('tahun-ajar.index')->with('success', 'Tahun ajar berhasil diperbarui.');
     }
 
+    public function toggle(Request $request, TahunAjar $tahunAjar)
+    {
+        $validated = $request->validate([
+            'is_active' => ['required', 'boolean'],
+        ]);
+
+        $setActive = (bool) $validated['is_active'];
+
+        TahunAjar::query()->update(['is_active' => false]);
+
+        if ($setActive) {
+            $tahunAjar->update(['is_active' => true]);
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'active_id' => $setActive ? $tahunAjar->id : null,
+            ]);
+        }
+
+        return redirect()->route('tahun-ajar.index')->with('success', 'Status tahun ajar diperbarui.');
+    }
+
     /**
      * Remove the specified resource from storage.
      */

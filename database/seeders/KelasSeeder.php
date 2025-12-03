@@ -20,14 +20,19 @@ class KelasSeeder extends Seeder
 
         $jurusans = Jurusan::pluck('id', 'kode_jurusan');
 
-        $kelasData = [
-            ['nama_kelas' => 'X RPL 1', 'level_kelas' => 'X', 'jurusan_code' => 'RPL'],
-            ['nama_kelas' => 'X RPL 2', 'level_kelas' => 'X', 'jurusan_code' => 'RPL'],
-            ['nama_kelas' => 'XI TKJ 1', 'level_kelas' => 'XI', 'jurusan_code' => 'TKJ'],
-            ['nama_kelas' => 'XI TKJ 2', 'level_kelas' => 'XI', 'jurusan_code' => 'TKJ'],
-            ['nama_kelas' => 'XII AKL 1', 'level_kelas' => 'XII', 'jurusan_code' => 'AKL'],
-            ['nama_kelas' => 'X OTKP 1', 'level_kelas' => 'X', 'jurusan_code' => 'OTKP'],
-        ];
+        $kelasData = [];
+
+        foreach (['RPL', 'DKV', 'TKJ'] as $jurusanCode) {
+            foreach (['X', 'XI', 'XII'] as $level) {
+                foreach (['1', '2'] as $urutan) {
+                    $kelasData[] = [
+                        'nama_kelas' => "{$level} {$jurusanCode} {$urutan}",
+                        'level_kelas' => $level,
+                        'jurusan_code' => $jurusanCode,
+                    ];
+                }
+            }
+        }
 
         foreach ($kelasData as $kelas) {
             if (!isset($jurusans[$kelas['jurusan_code']]) || !$tahun) {

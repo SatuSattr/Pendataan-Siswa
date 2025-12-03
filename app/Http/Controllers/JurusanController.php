@@ -13,7 +13,9 @@ class JurusanController extends Controller
      */
     public function index()
     {
-        $jurusans = Jurusan::orderBy('kode_jurusan')->paginate(10);
+        $jurusans = Jurusan::withCount('kelas')
+            ->orderBy('kode_jurusan')
+            ->paginate(10);
 
         return view('jurusan.index', compact('jurusans'));
     }

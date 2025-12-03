@@ -5,8 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Jurusan;
 use App\Models\Kelas;
 use App\Models\Siswa;
-use App\Models\User;
-use Illuminate\Http\Request;
+use App\Models\TahunAjar;
 
 class DashboardController extends Controller
 {
@@ -16,7 +15,7 @@ class DashboardController extends Controller
             'totalSiswa' => Siswa::count(),
             'totalJurusan' => Jurusan::count(),
             'totalKelas' => Kelas::count(),
-            'totalUsers' => User::count(),
+            'activeTahunAjar' => TahunAjar::where('is_active', true)->first(),
         ]);
     }
 }
