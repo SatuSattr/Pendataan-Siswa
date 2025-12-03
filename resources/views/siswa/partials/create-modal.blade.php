@@ -3,19 +3,19 @@
     <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="closeAddModal()"></div>
 
     @php
-        $kelasJurusanMap = $kelasList->mapWithKeys(
-            fn($k) => [
-                $k->id => [
-                    'jurusan_id' => $k->jurusan_id,
-                    'jurusan' => $k->jurusan->nama_jurusan ?? '-',
-                ],
-            ],
-        );
-        $oldJurusanName = optional($jurusans->firstWhere('id', old('jurusan_id')))->nama_jurusan;
+    $kelasJurusanMap = $kelasList->mapWithKeys(
+    fn($k) => [
+    $k->id => [
+    'jurusan_id' => $k->jurusan_id,
+    'jurusan' => $k->jurusan->nama_jurusan ?? '-',
+    ],
+    ],
+    );
+    $oldJurusanName = optional($jurusans->firstWhere('id', old('jurusan_id')))->nama_jurusan;
     @endphp
     <form x-show="showAddModal" x-transition x-ref="addForm" method="POST" action="{{ route('siswa.store') }}"
         enctype="multipart/form-data" x-data="kelasForm"
-        class="relative w-full max-w-4xl rounded-2xl bg-white h-[55vh] max-h-[95vh] overflow-y-auto p-6 shadow-2xl ring-1 ring-slate-200">
+        class="relative w-full max-w-4xl rounded-2xl bg-white max-h-[95vh] overflow-y-auto p-6 shadow-2xl ring-1 ring-slate-200">
         @csrf
 
         <button type="button"
@@ -24,7 +24,7 @@
             <i class="fa-solid fa-xmark"></i>
         </button>
 
-        <div class="flex flex-col gap-6 md:flex-row md:items-start h-full">
+        <div class="flex flex-col gap-6 md:grid md:grid-cols-[18rem,1fr] md:items-stretch h-full">
             <div class="flex justify-center md:justify-start h-full">
                 <div
                     class="h-full w-72 bg-gradient-to-br from-gray-50 to-slate-200 overflow-hidden ring-1 ring-slate-200 rounded-xl flex flex-col">
@@ -65,7 +65,7 @@
                     <input type="file" name="foto" class="hidden" accept="image/*" x-ref="fotoInput"
                         @change="handleFotoChange">
                     @error('foto')
-                        <p class="mt-2 px-4 text-xs text-rose-600">{{ $message }}</p>
+                    <p class="mt-2 px-4 text-xs text-rose-600">{{ $message }}</p>
                     @enderror
                 </div>
             </div>
@@ -82,7 +82,7 @@
                             value="{{ old('nama') }}" placeholder="Nama siswa" required
                             class="mt-2 block w-full rounded-xl border-slate-200 text-slate-800 shadow-sm focus:border-brand-400 focus:ring-brand-200">
                         @error('nama')
-                            <p class="mt-1 text-sm text-rose-600">{{ $message }}</p>
+                        <p class="mt-1 text-sm text-rose-600">{{ $message }}</p>
                         @enderror
                     </div>
                     <div>
@@ -91,7 +91,7 @@
                             placeholder="Masukkan NISN" required
                             class="mt-2 block w-full rounded-xl border-slate-200 text-slate-800 shadow-sm focus:border-brand-400 focus:ring-brand-200">
                         @error('nisn')
-                            <p class="mt-1 text-sm text-rose-600">{{ $message }}</p>
+                        <p class="mt-1 text-sm text-rose-600">{{ $message }}</p>
                         @enderror
                     </div>
                 </div>
@@ -103,18 +103,18 @@
                             <label
                                 class="flex-1 cursor-pointer rounded-xl border border-slate-200 bg-white px-2 py-3 text-sm font-semibold text-slate-800 hover:border-brand-300">
                                 <input type="radio" name="jenis_kelamin" value="L" class="mr-2 align-middle"
-                                    required @checked(old('jenis_kelamin') === 'L')>
+                                    required @checked(old('jenis_kelamin')==='L' )>
                                 Laki-laki
                             </label>
                             <label
                                 class="flex-1 cursor-pointer rounded-xl border border-slate-200 bg-white px-2 py-3 text-sm font-semibold text-slate-800 hover:border-brand-300">
                                 <input type="radio" name="jenis_kelamin" value="P" class="mr-2 align-middle"
-                                    required @checked(old('jenis_kelamin') === 'P')>
+                                    required @checked(old('jenis_kelamin')==='P' )>
                                 Perempuan
                             </label>
                         </div>
                         @error('jenis_kelamin')
-                            <p class="mt-1 text-sm text-rose-600">{{ $message }}</p>
+                        <p class="mt-1 text-sm text-rose-600">{{ $message }}</p>
                         @enderror
                     </div>
                     <div>
@@ -123,7 +123,7 @@
                         <input type="date" name="tanggal_lahir" id="tanggal_lahir" value="{{ old('tanggal_lahir') }}"
                             class="mt-2 block w-full rounded-xl border-slate-200 text-slate-800 shadow-sm focus:border-brand-400 focus:ring-brand-200">
                         @error('tanggal_lahir')
-                            <p class="mt-1 text-sm text-rose-600">{{ $message }}</p>
+                        <p class="mt-1 text-sm text-rose-600">{{ $message }}</p>
                         @enderror
                     </div>
                 </div>
@@ -136,7 +136,7 @@
                             :value="selectedJurusanName || ''" placeholder="Pilih kelas agar jurusan terisi otomatis"
                             class="mt-2 block w-full rounded-xl border-slate-200 bg-slate-50 text-slate-800 shadow-sm focus:border-brand-400 focus:ring-brand-200">
                         @error('jurusan_id')
-                            <p class="mt-1 text-sm text-rose-600">{{ $message }}</p>
+                        <p class="mt-1 text-sm text-rose-600">{{ $message }}</p>
                         @enderror
                     </div>
                     <div>
@@ -145,13 +145,13 @@
                             class="mt-2 block w-full rounded-xl border-slate-200 text-slate-800 shadow-sm focus:border-brand-400 focus:ring-brand-200">
                             <option value="">Pilih kelas</option>
                             @foreach ($kelasList as $kelas)
-                                <option value="{{ $kelas->id }}" @selected(old('kelas_id') == $kelas->id)>
-                                    {{ $kelas->nama_kelas }}
-                                </option>
+                            <option value="{{ $kelas->id }}" @selected(old('kelas_id')==$kelas->id)>
+                                {{ $kelas->nama_kelas }}
+                            </option>
                             @endforeach
                         </select>
                         @error('kelas_id')
-                            <p class="mt-1 text-sm text-rose-600">{{ $message }}</p>
+                        <p class="mt-1 text-sm text-rose-600">{{ $message }}</p>
                         @enderror
                     </div>
                     <div>
@@ -161,13 +161,13 @@
                             class="mt-2 block w-full rounded-xl border-slate-200 text-slate-800 shadow-sm focus:border-brand-400 focus:ring-brand-200">
                             <option value="">Pilih tahun ajar</option>
                             @foreach ($tahunAjars as $tahunAjar)
-                                <option value="{{ $tahunAjar->id }}" @selected(old('tahun_ajar_id') == $tahunAjar->id)>
-                                    {{ $tahunAjar->kode_tahun_ajar }} - {{ $tahunAjar->nama_tahun_ajar }}
-                                </option>
+                            <option value="{{ $tahunAjar->id }}" @selected(old('tahun_ajar_id')==$tahunAjar->id)>
+                                {{ $tahunAjar->kode_tahun_ajar }} - {{ $tahunAjar->nama_tahun_ajar }}
+                            </option>
                             @endforeach
                         </select>
                         @error('tahun_ajar_id')
-                            <p class="mt-1 text-sm text-rose-600">{{ $message }}</p>
+                        <p class="mt-1 text-sm text-rose-600">{{ $message }}</p>
                         @enderror
                     </div>
                 </div>
@@ -177,7 +177,7 @@
                     <textarea rows="3" name="alamat" id="alamat" placeholder="Alamat lengkap"
                         class="mt-2 block w-full rounded-xl border-slate-200 text-slate-800 shadow-sm focus:border-brand-400 focus:ring-brand-200">{{ old('alamat') }}</textarea>
                     @error('alamat')
-                        <p class="mt-1 text-sm text-rose-600">{{ $message }}</p>
+                    <p class="mt-1 text-sm text-rose-600">{{ $message }}</p>
                     @enderror
                 </div>
 
@@ -196,42 +196,42 @@
 </div>
 
 @once
-    @push('scripts')
-        <script>
-            document.addEventListener('alpine:init', () => {
-                Alpine.data('kelasForm', () => ({
-                    selectedKelasId: @json(old('kelas_id')),
-                    selectedJurusanId: @json(old('jurusan_id')),
-                    selectedJurusanName: @json($oldJurusanName),
-                    kelasJurusanMap: @json($kelasJurusanMap),
-                    fotoPreview: null,
-                    init() {
-                        this.syncJurusan(this.selectedKelasId);
-                        this.$watch('selectedKelasId', (val) => this.syncJurusan(val));
-                    },
-                    syncJurusan(val) {
-                        const data = this.kelasJurusanMap && this.kelasJurusanMap[val];
-                        this.selectedJurusanId = data ? data.jurusan_id : null;
-                        this.selectedJurusanName = data ? data.jurusan : '';
-                    },
-                    handleFotoChange(event) {
-                        const file = event?.target?.files?.[0];
-                        if (this.fotoPreview) {
-                            URL.revokeObjectURL(this.fotoPreview);
-                        }
-                        this.fotoPreview = file ? URL.createObjectURL(file) : null;
-                    },
-                    clearFoto() {
-                        if (this.fotoPreview) {
-                            URL.revokeObjectURL(this.fotoPreview);
-                        }
-                        this.fotoPreview = null;
-                        if (this.$refs.fotoInput) {
-                            this.$refs.fotoInput.value = '';
-                        }
-                    },
-                }));
-            });
-        </script>
-    @endpush
+@push('scripts')
+<script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('kelasForm', () => ({
+            selectedKelasId: @json(old('kelas_id')),
+            selectedJurusanId: @json(old('jurusan_id')),
+            selectedJurusanName: @json($oldJurusanName),
+            kelasJurusanMap: @json($kelasJurusanMap),
+            fotoPreview: null,
+            init() {
+                this.syncJurusan(this.selectedKelasId);
+                this.$watch('selectedKelasId', (val) => this.syncJurusan(val));
+            },
+            syncJurusan(val) {
+                const data = this.kelasJurusanMap && this.kelasJurusanMap[val];
+                this.selectedJurusanId = data ? data.jurusan_id : null;
+                this.selectedJurusanName = data ? data.jurusan : '';
+            },
+            handleFotoChange(event) {
+                const file = event?.target?.files?.[0];
+                if (this.fotoPreview) {
+                    URL.revokeObjectURL(this.fotoPreview);
+                }
+                this.fotoPreview = file ? URL.createObjectURL(file) : null;
+            },
+            clearFoto() {
+                if (this.fotoPreview) {
+                    URL.revokeObjectURL(this.fotoPreview);
+                }
+                this.fotoPreview = null;
+                if (this.$refs.fotoInput) {
+                    this.$refs.fotoInput.value = '';
+                }
+            },
+        }));
+    });
+</script>
+@endpush
 @endonce

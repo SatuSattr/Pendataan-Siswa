@@ -1,17 +1,17 @@
 @php
-    $navItems = [
-        ['route' => 'dashboard', 'label' => __('Dashboard'), 'icon' => 'fa-house'],
-        [
-            'route' => 'tahun-ajar.index',
-            'pattern' => 'tahun-ajar.*',
-            'label' => 'Tahun Ajar',
-            'icon' => 'fa-calendar-days',
-        ],
-        ['route' => 'jurusan.index', 'pattern' => 'jurusan.*', 'label' => 'Jurusan', 'icon' => 'fa-shapes'],
-        ['route' => 'kelas.index', 'pattern' => 'kelas.*', 'label' => 'Kelas', 'icon' => 'fa-chalkboard'],
-        ['route' => 'siswa.index', 'pattern' => 'siswa.*', 'label' => 'Siswa', 'icon' => 'fa-user-graduate'],
-        ['route' => 'users.index', 'pattern' => 'users.*', 'label' => 'Pengguna', 'icon' => 'fa-users'],
-    ];
+$navItems = [
+['route' => 'dashboard', 'label' => __('Dashboard'), 'icon' => 'fa-house'],
+[
+'route' => 'tahun-ajar.index',
+'pattern' => 'tahun-ajar.*',
+'label' => 'Tahun Ajar',
+'icon' => 'fa-calendar-days',
+],
+['route' => 'jurusan.index', 'pattern' => 'jurusan.*', 'label' => 'Jurusan', 'icon' => 'fa-shapes'],
+['route' => 'kelas.index', 'pattern' => 'kelas.*', 'label' => 'Kelas', 'icon' => 'fa-chalkboard'],
+['route' => 'siswa.index', 'pattern' => 'siswa.*', 'label' => 'Siswa', 'icon' => 'fa-user-graduate'],
+['route' => 'users.index', 'pattern' => 'users.*', 'label' => 'Pengguna', 'icon' => 'fa-users'],
+];
 @endphp
 
 <div x-cloak x-show="mobileOpen" class="fixed inset-0 z-30 bg-slate-900/50 backdrop-blur-sm lg:hidden"
@@ -57,27 +57,27 @@
         <p class="px-2 text-[11px] font-semibold uppercase tracking-[0.25em] text-slate-400">Menu</p>
         <nav class="mt-3 space-y-2">
             @foreach ($navItems as $item)
-                @php
-                    // cek apakah route sekarang cocok dengan item ini
-                    $isActive = request()->routeIs($item['pattern'] ?? $item['route']);
+            @php
+            // cek apakah route sekarang cocok dengan item ini
+            $isActive = request()->routeIs($item['pattern'] ?? $item['route']);
 
-                    $baseClasses = 'group flex items-center overflow-hidden text-sm font-semibold transition';
-                    $stateClasses = $isActive
-                        ? 'rounded-2xl text-brand-800 bg-brand-50 ring-1 ring-brand-100 shadow-sm'
-                        : 'rounded-xl text-slate-600 hover:text-slate-900 hover:bg-white hover:ring-1 hover:ring-slate-200';
+            $baseClasses = 'group flex items-center overflow-hidden text-sm font-semibold transition';
+            $stateClasses = $isActive
+            ? 'rounded-2xl text-brand-800 bg-brand-50 ring-1 ring-brand-100 shadow-sm'
+            : 'rounded-xl text-slate-600 hover:text-slate-900 hover:bg-white hover:ring-1 hover:ring-slate-200';
 
-                    $classes = $baseClasses . ' ' . $stateClasses;
-                @endphp
+            $classes = $baseClasses . ' ' . $stateClasses;
+            @endphp
 
-                <a href="{{ route($item['route']) }}" class="{{ $classes }}"
-                    x-bind:class="sidebarCollapsed ? 'justify-center max-w-11' : ''">
-                    <div class="w-11 h-11 flex items-center justify-center">
-                        <i class="fa-solid {{ $item['icon'] }}"></i>
-                    </div>
-                    <span class="whitespace-nowrap" x-show="!sidebarCollapsed">
-                        {{ $item['label'] }}
-                    </span>
-                </a>
+            <a href="{{ route($item['route']) }}" class="{{ $classes }}"
+                x-bind:class="sidebarCollapsed ? 'justify-center max-w-11' : ''">
+                <div class="w-11 h-11 flex items-center justify-center">
+                    <i class="fa-solid {{ $item['icon'] }}"></i>
+                </div>
+                <span class="whitespace-nowrap" x-show="!sidebarCollapsed">
+                    {{ $item['label'] }}
+                </span>
+            </a>
             @endforeach
         </nav>
     </div>
@@ -94,7 +94,7 @@
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
                 <button type="submit"
-                    class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-brand-500 text-white shadow-brand-200/60 hover:bg-brand-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400">
+                    class="h-10 w-10 btn-brand ">
                     <i class="fa-solid fa-arrow-right-from-bracket"></i>
                 </button>
             </form>
@@ -114,7 +114,7 @@
             <form method="POST" action="{{ route('logout') }}" class="ml-auto">
                 @csrf
                 <button type="submit"
-                    class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-brand-500 text-white shadow-brand-200/60 hover:bg-brand-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400">
+                    class="h-10 w-10 btn-brand ">
                     <i class="fa-solid fa-arrow-right-from-bracket"></i>
                 </button>
             </form>

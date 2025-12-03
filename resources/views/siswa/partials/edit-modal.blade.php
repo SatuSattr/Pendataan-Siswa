@@ -4,7 +4,7 @@
 
     <form x-show="showEditModal" x-transition x-ref="editFormEl" method="POST"
         :action="`${updateActionBase}/${editForm.id}`" enctype="multipart/form-data"
-        class="relative w-full max-w-4xl rounded-2xl bg-white max-h-[95vh] h-[55vh] overflow-y-auto p-6 shadow-2xl ring-1 ring-slate-200">
+        class="relative w-full max-w-4xl rounded-2xl bg-white max-h-[95vh] overflow-y-auto p-6 shadow-2xl ring-1 ring-slate-200">
         @csrf
         @method('PUT')
 
@@ -14,7 +14,7 @@
             <i class="fa-solid fa-xmark"></i>
         </button>
 
-        <div class="flex flex-col gap-6 md:flex-row md:items-start h-full">
+        <div class="flex flex-col gap-6 md:grid md:grid-cols-[18rem,1fr] md:items-stretch h-full">
             <div class="flex justify-center md:justify-start h-full">
                 <div
                     class="h-full w-72 bg-gradient-to-br from-gray-50 to-slate-200 overflow-hidden ring-1 ring-slate-200 rounded-xl flex flex-col">
@@ -119,7 +119,7 @@
                             class="mt-2 block w-full rounded-xl border-slate-200 text-slate-800 shadow-sm focus:border-brand-400 focus:ring-brand-200">
                             <option value="">Pilih kelas</option>
                             @foreach ($kelasList as $kelas)
-                                <option value="{{ $kelas->id }}">{{ $kelas->nama_kelas }}</option>
+                            <option value="{{ $kelas->id }}">{{ $kelas->nama_kelas }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -131,8 +131,9 @@
                             class="mt-2 block w-full rounded-xl border-slate-200 text-slate-800 shadow-sm focus:border-brand-400 focus:ring-brand-200">
                             <option value="">Pilih tahun ajar</option>
                             @foreach ($tahunAjars as $tahunAjar)
-                                <option value="{{ $tahunAjar->id }}">{{ $tahunAjar->kode_tahun_ajar }} -
-                                    {{ $tahunAjar->nama_tahun_ajar }}</option>
+                            <option value="{{ $tahunAjar->id }}">{{ $tahunAjar->kode_tahun_ajar }} -
+                                {{ $tahunAjar->nama_tahun_ajar }}
+                            </option>
                             @endforeach
                         </select>
                     </div>
