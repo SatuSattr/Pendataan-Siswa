@@ -88,6 +88,11 @@ class UserController extends Controller
 
         $user->save();
 
+        $redirectTo = $request->input('redirect_to');
+        if ($redirectTo) {
+            return redirect($redirectTo)->with('success', 'Pengguna berhasil diperbarui.');
+        }
+
         return redirect()->route('users.index')->with('success', 'Pengguna berhasil diperbarui.');
     }
 
@@ -103,5 +108,31 @@ class UserController extends Controller
         $user->delete();
 
         return redirect()->route('users.index')->with('success', 'Pengguna berhasil dihapus.');
+    }
+
+    /**
+     * Handle bulk actions for users.
+     */
+    public function bulk(Request $request)
+    {
+        $data = $request->validate([
+            'action' => ['required', Rule::in(['delete', 'set_role'])],
+            'ids' => ['required', 'array'],
+            'ids.*' => ['integer', 'exists:users,id'],
+            'role' => ['nullable', Rule::in(['admin', 'staff'])],
+        ]);
+
+        if ($data['action'] === 'delete') {
+            // hindari hapus diri sendiri
+            $ids = collect($data['ids'])->filter(fn ($id) => (int) $id !== auth()->id());
+            User::whereIn('id', $ids)->delete();
+        } elseif ($data['action'] === 'set_role') {
+            if (! $data['role']) {
+                return redirect()->route('users.index')->with('error', 'Role harus dipilih untuk aksi ini.');
+            }
+            User::whereIn('id', $data['ids'])->update(['role' => $data['role']]);
+        }
+
+        return redirect()->route('users.index')->with('success', 'Aksi massal berhasil dijalankan.');
     }
 }

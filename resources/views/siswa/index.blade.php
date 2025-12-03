@@ -11,7 +11,7 @@
 
     <div x-data="{
         showModal: false,
-        showAddModal: {{ $errors->any() ? 'true' : 'false' }},
+        showAddModal: false,
         showEditModal: false,
         viewMode: localStorage.getItem('siswaViewMode') || 'table',
         selected: null,
@@ -33,6 +33,12 @@
             remove_foto: false,
         },
         updateActionBase: `{{ url('/siswa') }}`,
+        bulkAction: '',
+        bulkKelasId: '',
+        bulkTahunAjarId: '',
+        bulkJurusanId: '',
+        selectedIds: [],
+        currentPageIds: @json($siswas->pluck('id')),
         setMode(mode) {
             this.viewMode = mode;
             localStorage.setItem('siswaViewMode', mode);
@@ -107,6 +113,35 @@
                 height: 60,
                 margin: 0,
             });
+        },
+        toggleSelectAll(event) {
+            const checked = event?.target?.checked;
+            if (checked) {
+                this.currentPageIds.forEach((id) => {
+                    if (!this.selectedIds.includes(id)) {
+                        this.selectedIds.push(id);
+                    }
+                });
+            } else {
+                this.selectedIds = this.selectedIds.filter(id => !this.currentPageIds.includes(id));
+            }
+        },
+        submitBulk() {
+            if (this.selectedIds.length === 0 || !this.bulkAction) return;
+            if (this.bulkAction === 'set_kelas' && (!this.bulkKelasId || !this.bulkTahunAjarId)) return;
+            if (this.bulkAction === 'set_tahun_ajar' && !this.bulkTahunAjarId) return;
+            if (this.bulkAction === 'set_jurusan' && !this.bulkJurusanId) return;
+            this.$refs.bulkForm.submit();
+        },
+        clearSelection() {
+            this.selectedIds = [];
+            this.bulkAction = '';
+            this.bulkKelasId = '';
+            this.bulkTahunAjarId = '';
+            this.bulkJurusanId = '';
+        },
+        get isAllCurrentPageSelected() {
+            return this.currentPageIds.length > 0 && this.currentPageIds.every((id) => this.selectedIds.includes(id));
         }
     }" @open-add-modal.window="openAddModal()" class="space-y-6">
         <div class="card-surface rounded-2xl p-6">
@@ -186,6 +221,11 @@
                 <table class="min-w-full table-soft divide-y divide-slate-100">
                     <thead>
                         <tr>
+                            <th class="px-4 py-3 text-left w-12">
+                                <input type="checkbox" class="h-4 w-4 rounded border-slate-300 text-brand-600"
+                                    :checked="isAllCurrentPageSelected"
+                                    @change="toggleSelectAll($event)">
+                            </th>
                             <th class="px-4 py-3 text-left">Foto</th>
                             <th class="px-4 py-3 text-left">NISN</th>
                             <th class="px-4 py-3 text-left">Nama</th>
@@ -213,6 +253,10 @@
                                     ->values();
                             @endphp
                             <tr class="hover:bg-slate-50/60 transition">
+                                <td class="px-4 py-3">
+                                    <input type="checkbox" class="h-4 w-4 rounded border-slate-300 text-brand-600"
+                                        x-model="selectedIds" value="{{ $siswa->id }}">
+                                </td>
                                 <td class="px-4 py-3">
                                     @if ($siswa->foto_path)
                                         <img src="{{ Storage::url($siswa->foto_path) }}"
@@ -292,6 +336,10 @@
                             @endphp
                             <div
                                 class="group rounded-xl border relative border-slate-200 bg-white p-4 shadow-sm ring-1 ring-transparent transition hover:-translate-y-1 hover:border-brand-200 hover:shadow-lg hover:ring-brand-100/70">
+                                <div class="absolute right-3 top-3 z-10">
+                                    <input type="checkbox" class="h-4 w-4 rounded border-slate-300 text-brand-600"
+                                        x-model="selectedIds" value="{{ $siswa->id }}">
+                                </div>
                                 @if ($siswa->foto_path)
                                     <img src="{{ Storage::url($siswa->foto_path) }}" alt="Foto {{ $siswa->nama }}"
                                         class="w-24 h-full z-20 rounded-lg rounded-r-none object-cover absolute top-0 left-0 ring-1 ring-slate-200">
@@ -373,6 +421,82 @@
 
         <template x-teleport="body">
             @include('siswa.partials.edit-modal')
+        </template>
+
+        <form x-ref="bulkForm" method="POST" action="{{ route('siswa.bulk') }}" class="hidden">
+            @csrf
+            <input type="hidden" name="action" :value="bulkAction">
+            <input type="hidden" name="kelas_id" :value="bulkKelasId">
+            <input type="hidden" name="tahun_ajar_id" :value="bulkTahunAjarId">
+            <input type="hidden" name="jurusan_id" :value="bulkJurusanId">
+            <template x-for="id in selectedIds" :key="id">
+                <input type="hidden" name="ids[]" :value="id">
+            </template>
+        </form>
+
+        <template x-teleport="body">
+            <div x-cloak x-show="selectedIds.length > 0"
+                class="fixed inset-x-0 bottom-6 z-[95] flex justify-center px-4">
+                <div class="flex flex-wrap items-center gap-3 rounded-full bg-white px-4 py-3 shadow-2xl ring-1 ring-slate-200">
+                    <span class="text-sm font-semibold text-slate-700">
+                        <i class="fa-solid fa-check-double text-brand-600 mr-2"></i>
+                        <span x-text="selectedIds.length"></span> dipilih
+                    </span>
+                    <select x-model="bulkAction"
+                        class="rounded-full border-slate-200 text-slate-800 shadow-sm focus:border-brand-400 focus:ring-brand-200 text-sm px-3 py-2 min-w-[150px]">
+                        <option value="">Pilih aksi</option>
+                        <option value="delete">Hapus</option>
+                        <option value="set_jurusan">Set Jurusan</option>
+                        <option value="set_kelas">Set Kelas</option>
+                        <option value="set_tahun_ajar">Set Tahun Ajar</option>
+                    </select>
+                    <div x-show="bulkAction === 'set_jurusan'" class="flex items-center">
+                        <select x-model="bulkJurusanId"
+                            class="rounded-full border-slate-200 text-slate-800 shadow-sm focus:border-brand-400 focus:ring-brand-200 text-sm px-3 py-2 min-w-[160px]">
+                            <option value="">Pilih jurusan</option>
+                            @foreach ($jurusans as $jurusan)
+                                <option value="{{ $jurusan->id }}">{{ $jurusan->nama_jurusan }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div x-show="bulkAction === 'set_kelas'" class="flex items-center gap-2">
+                        <select x-model="bulkKelasId"
+                            class="rounded-full border-slate-200 text-slate-800 shadow-sm focus:border-brand-400 focus:ring-brand-200 text-sm px-3 py-2 min-w-[180px]">
+                            <option value="">Pilih kelas</option>
+                            @foreach ($kelasList as $kelas)
+                                <option value="{{ $kelas->id }}">{{ $kelas->nama_kelas }}</option>
+                            @endforeach
+                        </select>
+                        <select x-model="bulkTahunAjarId"
+                            class="rounded-full border-slate-200 text-slate-800 shadow-sm focus:border-brand-400 focus:ring-brand-200 text-sm px-3 py-2 min-w-[180px]">
+                            <option value="">Pilih tahun ajar</option>
+                            @foreach ($tahunAjars as $tahunAjar)
+                                <option value="{{ $tahunAjar->id }}">{{ $tahunAjar->kode_tahun_ajar }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div x-show="bulkAction === 'set_tahun_ajar'" class="flex items-center">
+                        <select x-model="bulkTahunAjarId"
+                            class="rounded-full border-slate-200 text-slate-800 shadow-sm focus:border-brand-400 focus:ring-brand-200 text-sm px-3 py-2 min-w-[160px]">
+                            <option value="">Pilih tahun ajar</option>
+                            @foreach ($tahunAjars as $tahunAjar)
+                                <option value="{{ $tahunAjar->id }}">{{ $tahunAjar->kode_tahun_ajar }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <button type="button"
+                        class="inline-flex h-10 items-center gap-2 rounded-full bg-brand-600 px-4 text-sm font-semibold text-white shadow hover:bg-brand-700"
+                        @click="submitBulk()">
+                        <i class="fa-solid fa-play"></i> Jalankan
+                    </button>
+                    <button type="button"
+                        class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-slate-50 text-slate-500 ring-1 ring-slate-200 hover:bg-slate-100"
+                        title="Batalkan pilihan"
+                        @click="clearSelection()">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
         </template>
 
     </div>

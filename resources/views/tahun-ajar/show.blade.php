@@ -3,7 +3,7 @@
         <x-page-header path="/tahun-ajar/show/{{ $tahunAjar->kode_tahun_ajar }}" title="Detail Tahun Ajar" />
     </x-slot>
 
-    <div class="space-y-6">
+    <div class="space-y-6" x-data="tahunAjarShowView()">
         <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-brand-50 via-white to-slate-50 p-6 ring-1 ring-slate-200">
             <div class="absolute -left-10 -top-10 h-40 w-40 rounded-full bg-brand-200/30 blur-2xl"></div>
             <div class="absolute -right-12 -bottom-16 h-48 w-48 rounded-full bg-indigo-100/40 blur-3xl"></div>
@@ -14,9 +14,14 @@
                     <h1 class="mt-2 text-3xl font-bold text-slate-900">{{ $tahunAjar->kode_tahun_ajar }}</h1>
                     <p class="mt-1 text-sm text-slate-600">{{ $tahunAjar->nama_tahun_ajar }}</p>
                 </div>
-                <a href="{{ route('tahun-ajar.edit', $tahunAjar) }}" type="button" class="btn-brand p-4 absolute right-0 top-0" @click="openEditModal()">
+                <button type="button" class="btn-brand p-4 absolute right-0 top-0"
+                    @click.prevent="openEditModal({
+                        id: {{ $tahunAjar->id }},
+                        kode_tahun_ajar: @js($tahunAjar->kode_tahun_ajar),
+                        nama_tahun_ajar: @js($tahunAjar->nama_tahun_ajar),
+                    })">
                     <i class="fa-solid fa-pen-to-square"></i>
-                </a>
+                </button>
             </div>
 
             <div class="relative mt-5 flex flex-wrap gap-3">
@@ -51,5 +56,38 @@
                 <p class="text-xs text-slate-500">Hanya satu yang aktif</p>
             </div>
         </div>
+
+        <template x-teleport="body">
+            @include('tahun-ajar.partials.edit-modal')
+        </template>
     </div>
+
+    @push('scripts')
+        <script>
+            function tahunAjarShowView() {
+                const emptyForm = {
+                    id: null,
+                    kode_tahun_ajar: '',
+                    nama_tahun_ajar: '',
+                };
+                return {
+                    showEditModal: false,
+                    emptyForm,
+                    editForm: { ...emptyForm },
+                    updateActionBase: `{{ url('/tahun-ajar') }}`,
+                    openEditModal(data) {
+                        this.editForm = { ...this.emptyForm, ...data };
+                        this.showEditModal = true;
+                        this.$nextTick(() => this.$refs.editKodeInput?.focus());
+                    },
+                    closeEditModal() {
+                        this.showEditModal = false;
+                        setTimeout(() => {
+                            this.editForm = { ...this.emptyForm };
+                        }, 200);
+                    },
+                };
+            }
+        </script>
+    @endpush
 </x-app-layout>

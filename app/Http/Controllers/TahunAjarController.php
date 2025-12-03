@@ -73,6 +73,11 @@ class TahunAjarController extends Controller
 
         $tahunAjar->update($data);
 
+        $redirectTo = $request->input('redirect_to');
+        if ($redirectTo) {
+            return redirect($redirectTo)->with('success', 'Tahun ajar berhasil diperbarui.');
+        }
+
         return redirect()->route('tahun-ajar.index')->with('success', 'Tahun ajar berhasil diperbarui.');
     }
 
@@ -108,5 +113,23 @@ class TahunAjarController extends Controller
         $tahunAjar->delete();
 
         return redirect()->route('tahun-ajar.index')->with('success', 'Tahun ajar berhasil dihapus.');
+    }
+
+    /**
+     * Handle bulk actions for tahun ajar.
+     */
+    public function bulk(Request $request)
+    {
+        $data = $request->validate([
+            'action' => ['required', Rule::in(['delete'])],
+            'ids' => ['required', 'array'],
+            'ids.*' => ['integer', 'exists:tahun_ajars,id'],
+        ]);
+
+        if ($data['action'] === 'delete') {
+            TahunAjar::whereIn('id', $data['ids'])->delete();
+        }
+
+        return redirect()->route('tahun-ajar.index')->with('success', 'Aksi massal berhasil dijalankan.');
     }
 }

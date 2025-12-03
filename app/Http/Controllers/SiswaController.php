@@ -259,4 +259,83 @@ class SiswaController extends Controller
 
         return redirect()->route('siswa.index')->with('success', 'Data siswa berhasil dihapus.');
     }
+
+    /**
+     * Handle bulk actions for siswa.
+     */
+    public function bulk(Request $request)
+    {
+        $data = $request->validate([
+            'action' => ['required', Rule::in(['delete', 'set_jurusan', 'set_kelas', 'set_tahun_ajar'])],
+            'ids' => ['required', 'array'],
+            'ids.*' => ['integer', 'exists:siswas,id'],
+            'jurusan_id' => ['nullable', 'exists:jurusans,id'],
+            'kelas_id' => ['nullable', 'exists:kelas,id'],
+            'tahun_ajar_id' => ['nullable', 'exists:tahun_ajars,id'],
+        ]);
+
+        if ($data['action'] === 'delete') {
+            $siswas = Siswa::whereIn('id', $data['ids'])->get();
+            foreach ($siswas as $siswa) {
+                if ($siswa->foto_path) {
+                    Storage::disk('public')->delete($siswa->foto_path);
+                }
+            }
+            Siswa::whereIn('id', $data['ids'])->delete();
+
+            return redirect()->route('siswa.index')->with('success', 'Data siswa terpilih berhasil dihapus.');
+        }
+
+        if ($data['action'] === 'set_jurusan' && ! $data['jurusan_id']) {
+            return redirect()->route('siswa.index')->with('error', 'Jurusan harus dipilih untuk aksi ini.');
+        }
+        if ($data['action'] === 'set_kelas' && (! $data['kelas_id'] || ! $data['tahun_ajar_id'])) {
+            return redirect()->route('siswa.index')->with('error', 'Kelas dan tahun ajar harus dipilih untuk aksi ini.');
+        }
+        if ($data['action'] === 'set_tahun_ajar' && ! $data['tahun_ajar_id']) {
+            return redirect()->route('siswa.index')->with('error', 'Tahun ajar harus dipilih untuk aksi ini.');
+        }
+
+        $kelasTarget = null;
+        if ($data['action'] === 'set_kelas') {
+            $kelasTarget = Kelas::find($data['kelas_id']);
+            if (! $kelasTarget) {
+                return redirect()->route('siswa.index')->with('error', 'Kelas tidak ditemukan.');
+            }
+        }
+
+        DB::transaction(function () use ($data, $kelasTarget) {
+            $siswas = Siswa::whereIn('id', $data['ids'])->get();
+            foreach ($siswas as $siswa) {
+                if ($data['action'] === 'set_jurusan') {
+                    $siswa->update(['jurusan_id' => $data['jurusan_id']]);
+                } elseif ($data['action'] === 'set_tahun_ajar') {
+                    $siswa->update(['tahun_ajar_id' => $data['tahun_ajar_id']]);
+                    $activeDetail = $siswa->kelasDetails()->where('status', 'aktif')->latest()->first();
+                    if ($activeDetail) {
+                        $activeDetail->update(['tahun_ajar_id' => $data['tahun_ajar_id']]);
+                    }
+                } elseif ($data['action'] === 'set_kelas' && $kelasTarget) {
+                    $siswa->update([
+                        'jurusan_id' => $kelasTarget->jurusan_id,
+                        'tahun_ajar_id' => $data['tahun_ajar_id'],
+                    ]);
+
+                    $activeDetail = $siswa->kelasDetails()->where('status', 'aktif')->latest()->first();
+                    if ($activeDetail) {
+                        $activeDetail->update(['status' => 'nonaktif']);
+                    }
+
+                    KelasDetail::create([
+                        'siswa_id' => $siswa->id,
+                        'kelas_id' => $kelasTarget->id,
+                        'tahun_ajar_id' => $data['tahun_ajar_id'],
+                        'status' => 'aktif',
+                    ]);
+                }
+            }
+        });
+
+        return redirect()->route('siswa.index')->with('success', 'Aksi massal berhasil dijalankan.');
+    }
 }

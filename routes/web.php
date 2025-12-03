@@ -16,12 +16,20 @@ Route::get('/', function () {
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+    Route::middleware('role:admin,staff')->group(function () {
+        Route::post('siswa/bulk', [SiswaController::class, 'bulk'])->name('siswa.bulk');
+        Route::resource('siswa', SiswaController::class);
+    });
+
     Route::middleware('admin')->group(function () {
         Route::resource('tahun-ajar', TahunAjarController::class)->parameters(['tahun-ajar' => 'tahunAjar']);
         Route::patch('tahun-ajar/{tahunAjar}/toggle', [TahunAjarController::class, 'toggle'])->name('tahun-ajar.toggle');
+        Route::post('tahun-ajar/bulk', [TahunAjarController::class, 'bulk'])->name('tahun-ajar.bulk');
+        Route::post('jurusan/bulk', [JurusanController::class, 'bulk'])->name('jurusan.bulk');
+        Route::post('kelas/bulk', [KelasController::class, 'bulk'])->name('kelas.bulk');
         Route::resource('jurusan', JurusanController::class);
         Route::resource('kelas', KelasController::class)->parameters(['kelas' => 'kelas']);
-        Route::resource('siswa', SiswaController::class);
+        Route::post('users/bulk', [UserController::class, 'bulk'])->name('users.bulk');
         Route::resource('users', UserController::class);
     });
 });

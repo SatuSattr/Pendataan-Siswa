@@ -9,7 +9,7 @@
     $nonAktif = $totalSiswa - $aktif;
     @endphp
 
-    <div class="space-y-6" x-data="kelasSiswaDetail()">
+    <div class="space-y-6" x-data="kelasEditView()" @open-kelas-edit.window="openKelasEdit($event.detail)">
         <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-brand-50 via-white to-slate-50 p-6 ring-1 ring-slate-200">
             <div class="absolute -left-10 -top-10 h-40 w-40 rounded-full bg-brand-200/30 blur-2xl"></div>
             <div class="absolute -right-12 -bottom-16 h-48 w-48 rounded-full bg-indigo-100/40 blur-3xl"></div>
@@ -20,9 +20,16 @@
                     <h1 class="mt-2 text-3xl font-bold text-slate-900">{{ $kelas->nama_kelas }}</h1>
                     <p class="mt-1 text-sm text-slate-600">Informasi kelas, status siswa, dan tahun ajar aktif.</p>
                 </div>
-                <a href="{{ route('kelas.edit', $kelas) }}" class="btn-brand p-4 absolute right-0 top-0">
+                <button type="button" class="btn-brand p-4 absolute right-0 top-0"
+                    @click.prevent="$dispatch('open-kelas-edit', {
+                        id: {{ $kelas->id }},
+                        nama_kelas: @js($kelas->nama_kelas),
+                        level_kelas: @js($kelas->level_kelas),
+                        jurusan_id: {{ $kelas->jurusan_id ?? 'null' }},
+                        tahun_ajar_id: {{ $kelas->tahun_ajar_id ?? 'null' }},
+                    })">
                     <i class="fa-solid fa-pen-to-square"></i>
-                </a>
+                </button>
             </div>
 
             <div class="relative mt-5 flex flex-wrap gap-3">
@@ -39,7 +46,7 @@
         </div>
 
 
-        <div class="card-surface rounded-2xl p-6 ring-1 ring-slate-100">
+        <div class="card-surface rounded-2xl p-6 ring-1 ring-slate-100" x-data="kelasSiswaDetail()">
             <div class="flex items-center justify-between">
                 <h3 class="text-lg font-semibold text-slate-900">Siswa dalam Kelas Ini</h3>
                 <span class="text-xs font-semibold uppercase tracking-wide text-slate-500">Total: {{ $totalSiswa }}</span>
@@ -94,27 +101,6 @@
                                     <a href="{{ route('siswa.show', $detail->siswa) }}" class="text-brand-600 hover:text-brand-700" title="Detail">
                                         <i class="fa-solid fa-eye"></i>
                                     </a>
-                                    @php
-                                        $fotoUrl = $detail->siswa?->foto_path
-                                            ? (Str::startsWith($detail->siswa->foto_path, 'images/') ? asset($detail->siswa->foto_path) : Storage::url($detail->siswa->foto_path))
-                                            : null;
-                                    @endphp
-                                    <a href="{{ route('siswa.edit', $detail->siswa) }}" class="text-sky-600 hover:text-sky-700" title="Edit"
-                                        @click.prevent="openEditModal({
-                                            id: {{ $detail->siswa->id }},
-                                            nama: @js($detail->siswa->nama),
-                                            nisn: @js($detail->siswa->nisn),
-                                            alamat: @js($detail->siswa->alamat),
-                                            tanggal_lahir: @js(optional($detail->siswa->tanggal_lahir)->toDateString()),
-                                            jenis_kelamin: @js($detail->siswa->jenis_kelamin),
-                                            jurusan_id: {{ $detail->siswa->jurusan_id ?? 'null' }},
-                                            jurusan_name: @js($detail->siswa->jurusan->nama_jurusan ?? null),
-                                            tahun_ajar_id: {{ $detail->tahun_ajar_id ?? 'null' }},
-                                            kelas_id: {{ $detail->kelas_id ?? 'null' }},
-                                            foto_url: @js($fotoUrl),
-                                        })">
-                                        <i class="fa-solid fa-pen-to-square"></i>
-                                    </a>
                                     <form action="{{ route('siswa.destroy', $detail->siswa) }}" method="POST" class="inline">
                                         @csrf
                                         @method('DELETE')
@@ -137,13 +123,41 @@
         </div>
 
         <template x-teleport="body">
-            @include('siswa.partials.edit-modal')
+            @include('kelas.partials.edit-modal')
         </template>
+
     </div>
 
 
     @push('scripts')
         <script>
+            function kelasEditView() {
+                const emptyForm = {
+                    id: null,
+                    nama_kelas: '',
+                    level_kelas: '',
+                    jurusan_id: '',
+                    tahun_ajar_id: '',
+                };
+                return {
+                    showEditModal: false,
+                    emptyForm,
+                    editForm: { ...emptyForm },
+                    updateActionBase: `{{ url('/kelas') }}`,
+                    openKelasEdit(data) {
+                        this.editForm = { ...this.emptyForm, ...data };
+                        this.showEditModal = true;
+                        this.$nextTick(() => this.$refs.editNamaInput?.focus());
+                    },
+                    closeEditModal() {
+                        this.showEditModal = false;
+                        setTimeout(() => {
+                            this.editForm = { ...this.emptyForm };
+                        }, 200);
+                    },
+                };
+            }
+
             function kelasSiswaDetail() {
                 return {
                     showEditModal: false,

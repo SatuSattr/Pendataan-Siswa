@@ -22,7 +22,10 @@ class KelasController extends Controller
             ->orderByDesc('created_at')
             ->paginate(10);
 
-        return view('kelas.index', compact('kelas'));
+        $jurusans = Jurusan::orderBy('nama_jurusan')->get();
+        $tahunAjars = TahunAjar::orderByDesc('kode_tahun_ajar')->get();
+
+        return view('kelas.index', compact('kelas', 'jurusans', 'tahunAjars'));
     }
 
     /**
@@ -68,6 +71,7 @@ class KelasController extends Controller
 
         $kelasList = Kelas::with('jurusan')->orderBy('nama_kelas')->get();
         $tahunAjars = TahunAjar::orderByDesc('kode_tahun_ajar')->get();
+        $jurusans = Jurusan::orderBy('nama_jurusan')->get();
         $kelasJurusanMap = $kelasList->mapWithKeys(function ($k) {
             return [
                 $k->id => [
@@ -77,7 +81,7 @@ class KelasController extends Controller
             ];
         });
 
-        return view('kelas.show', compact('kelas', 'kelasList', 'tahunAjars', 'kelasJurusanMap'));
+        return view('kelas.show', compact('kelas', 'kelasList', 'tahunAjars', 'kelasJurusanMap', 'jurusans'));
     }
 
     /**
@@ -105,6 +109,11 @@ class KelasController extends Controller
 
         $kelas->update($data);
 
+        $redirectTo = $request->input('redirect_to');
+        if ($redirectTo) {
+            return redirect($redirectTo)->with('success', 'Kelas berhasil diperbarui.');
+        }
+
         return redirect()->route('kelas.index')->with('success', 'Kelas berhasil diperbarui.');
     }
 
@@ -116,5 +125,48 @@ class KelasController extends Controller
         $kelas->delete();
 
         return redirect()->route('kelas.index')->with('success', 'Kelas berhasil dihapus.');
+    }
+
+    /**
+     * Handle bulk actions for kelas.
+     */
+    public function bulk(Request $request)
+    {
+        $data = $request->validate([
+            'action' => ['required', Rule::in(['delete', 'set_jurusan', 'set_level', 'set_tahun_ajar'])],
+            'ids' => ['required', 'array'],
+            'ids.*' => ['integer', 'exists:kelas,id'],
+            'jurusan_id' => ['nullable', 'exists:jurusans,id'],
+            'level_kelas' => ['nullable', Rule::in(['X', 'XI', 'XII'])],
+            'tahun_ajar_id' => ['nullable', 'exists:tahun_ajars,id'],
+        ]);
+
+        $query = Kelas::whereIn('id', $data['ids']);
+
+        switch ($data['action']) {
+            case 'delete':
+                $query->delete();
+                break;
+            case 'set_jurusan':
+                if (! $data['jurusan_id']) {
+                    return redirect()->route('kelas.index')->with('error', 'Jurusan harus dipilih untuk aksi ini.');
+                }
+                $query->update(['jurusan_id' => $data['jurusan_id']]);
+                break;
+            case 'set_level':
+                if (! $data['level_kelas']) {
+                    return redirect()->route('kelas.index')->with('error', 'Level harus dipilih untuk aksi ini.');
+                }
+                $query->update(['level_kelas' => $data['level_kelas']]);
+                break;
+            case 'set_tahun_ajar':
+                if (! $data['tahun_ajar_id']) {
+                    return redirect()->route('kelas.index')->with('error', 'Tahun ajar harus dipilih untuk aksi ini.');
+                }
+                $query->update(['tahun_ajar_id' => $data['tahun_ajar_id']]);
+                break;
+        }
+
+        return redirect()->route('kelas.index')->with('success', 'Aksi massal berhasil dijalankan.');
     }
 }

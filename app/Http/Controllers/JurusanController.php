@@ -75,6 +75,11 @@ class JurusanController extends Controller
 
         $jurusan->update($data);
 
+        $redirectTo = $request->input('redirect_to');
+        if ($redirectTo) {
+            return redirect($redirectTo)->with('success', 'Jurusan berhasil diperbarui.');
+        }
+
         return redirect()->route('jurusan.index')->with('success', 'Jurusan berhasil diperbarui.');
     }
 
@@ -86,5 +91,23 @@ class JurusanController extends Controller
         $jurusan->delete();
 
         return redirect()->route('jurusan.index')->with('success', 'Jurusan berhasil dihapus.');
+    }
+
+    /**
+     * Handle bulk actions for jurusan.
+     */
+    public function bulk(Request $request)
+    {
+        $data = $request->validate([
+            'action' => ['required', Rule::in(['delete'])],
+            'ids' => ['required', 'array'],
+            'ids.*' => ['integer', 'exists:jurusans,id'],
+        ]);
+
+        if ($data['action'] === 'delete') {
+            Jurusan::whereIn('id', $data['ids'])->delete();
+        }
+
+        return redirect()->route('jurusan.index')->with('success', 'Aksi massal berhasil dijalankan.');
     }
 }
