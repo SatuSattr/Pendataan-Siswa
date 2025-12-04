@@ -12,6 +12,30 @@
 
     <div class="space-y-6" x-data="jurusanListView()" @open-add-modal.window="openAddModal()">
         <div class="card-surface rounded-2xl p-6">
+            <form method="GET" action="{{ route('jurusan.index') }}"
+                class="flex flex-col gap-4 md:flex-row md:flex-wrap md:items-end">
+                <div class="md:flex-1 min-w-[260px]">
+                    <label class="block text-sm font-semibold text-slate-700">Cari kode atau nama jurusan</label>
+                    <div
+                        class="mt-2 flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-3 pr-0 text-slate-800 shadow-sm focus-within:border-brand-400 focus-within:ring-2 focus-within:ring-brand-100">
+                        <input type="text" name="search" value="{{ $search }}"
+                            class="flex-1 border-0 bg-transparent py-2 text-sm focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+                            placeholder="Cari...">
+                        <a href="{{ route('jurusan.index') }}"
+                            class="inline-flex h-10 w-10 items-center justify-center rounded-lg text-slate-500 hover:text-brand-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
+                            title="Reset">
+                            <i class="fa-solid fa-rotate-right"></i>
+                        </a>
+                        <button type="submit"
+                            class="btn-brand inline-flex h-10 w-10 items-center justify-center shadow-none"
+                            title="Cari">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="card-surface rounded-2xl p-6">
             <div class="flex items-center justify-between gap-3">
                 <div>
                     <h3 class="text-lg font-semibold text-slate-900">Daftar Jurusan</h3>

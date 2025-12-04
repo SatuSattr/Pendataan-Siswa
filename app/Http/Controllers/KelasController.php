@@ -13,19 +13,35 @@ class KelasController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
+        $search = $request->query('search');
+
         $kelas = Kelas::with(['jurusan', 'tahunAjar'])
             ->withCount(['kelasDetails as siswa_count' => function ($q) {
                 $q->where('status', 'aktif');
             }])
+            ->when($search, function ($query) use ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('nama_kelas', 'like', "%{$search}%")
+                        ->orWhere('level_kelas', 'like', "%{$search}%")
+                        ->orWhereHas('jurusan', function ($jurusanQuery) use ($search) {
+                            $jurusanQuery->where('nama_jurusan', 'like', "%{$search}%");
+                        })
+                        ->orWhereHas('tahunAjar', function ($tahunAjarQuery) use ($search) {
+                            $tahunAjarQuery->where('kode_tahun_ajar', 'like', "%{$search}%")
+                                ->orWhere('nama_tahun_ajar', 'like', "%{$search}%");
+                        });
+                });
+            })
             ->orderByDesc('created_at')
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString();
 
         $jurusans = Jurusan::orderBy('nama_jurusan')->get();
         $tahunAjars = TahunAjar::orderByDesc('kode_tahun_ajar')->get();
 
-        return view('kelas.index', compact('kelas', 'jurusans', 'tahunAjars'));
+        return view('kelas.index', compact('kelas', 'jurusans', 'tahunAjars', 'search'));
     }
 
     /**

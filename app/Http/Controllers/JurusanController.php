@@ -11,13 +11,22 @@ class JurusanController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $jurusans = Jurusan::withCount('kelas')
-            ->orderBy('kode_jurusan')
-            ->paginate(10);
+        $search = $request->query('search');
 
-        return view('jurusan.index', compact('jurusans'));
+        $jurusans = Jurusan::withCount('kelas')
+            ->when($search, function ($query) use ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('kode_jurusan', 'like', "%{$search}%")
+                        ->orWhere('nama_jurusan', 'like', "%{$search}%");
+                });
+            })
+            ->orderBy('kode_jurusan')
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('jurusan.index', compact('jurusans', 'search'));
     }
 
     /**

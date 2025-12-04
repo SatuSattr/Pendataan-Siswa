@@ -11,11 +11,21 @@ class TahunAjarController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $tahunAjars = TahunAjar::orderByDesc('created_at')->paginate(10);
+        $search = $request->query('search');
 
-        return view('tahun-ajar.index', compact('tahunAjars'));
+        $tahunAjars = TahunAjar::when($search, function ($query) use ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('kode_tahun_ajar', 'like', "%{$search}%")
+                        ->orWhere('nama_tahun_ajar', 'like', "%{$search}%");
+                });
+            })
+            ->orderByDesc('created_at')
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('tahun-ajar.index', compact('tahunAjars', 'search'));
     }
 
     /**
